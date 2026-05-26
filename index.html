@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BillGuard — Hospital Bill Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #0B1C2C;
+  --navy2:  #122236;
+  --teal:   #1ABFB8;
+  --teal2:  #0D9E98;
+  --gold:   #E8C547;
+  --cream:  #F2EDE4;
+  --white:  #FFFFFF;
+  --green:  #4CAF82;
+  --red:    #E05252;
+  --amber:  #E8962A;
+  --muted:  #8CA0B2;
+  --border: rgba(255,255,255,0.08);
+  --card:   rgba(255,255,255,0.04);
+  --r:      14px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--navy);
+  color: var(--cream);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Background mesh ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 800px 500px at 15% 0%, rgba(26,191,184,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 85% 100%, rgba(232,197,71,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 400px 300px at 50% 50%, rgba(26,191,184,0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11,28,44,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 max(5vw, 20px);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--teal);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.logo span { color: var(--teal); }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.lang-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lang-pill select {
+  background: none;
+  border: none;
+  color: var(--cream);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  padding-right: 4px;
+}
+
+.lang-pill select option { background: var(--navy2); }
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 72px 24px 48px;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(26,191,184,0.12);
+  border: 1px solid rgba(26,191,184,0.3);
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 28px;
+}
+
+.hero-badge::before { content: '⚕'; font-size: 14px; }
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(38px, 7vw, 62px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--white);
+  margin-bottom: 20px;
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--teal);
+  font-weight: 300;
+}
+
+.hero-sub {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 520px;
+  margin: 0 auto 40px;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 48px;
+}
+
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold);
+  display: block;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+/* ── TABS ── */
+.main { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 0 24px 100px; }
+
+.tab-row {
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 5px;
+  margin-bottom: 28px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 11px 10px;
+  background: none;
+  border: none;
+  border-radius: 12px;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab-btn.active {
+  background: var(--teal);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.tab-btn:hover:not(.active) { color: var(--cream); }
+
+/* ── CONSENT ── */
+.consent-box {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(232,197,71,0.06);
+  border: 1px solid rgba(232,197,71,0.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 28px;
+  font-size: 13px;
+  color: rgba(242,237,228,0.75);
+  line-height: 1.6;
+}
+
+.consent-box input[type=checkbox] {
+  accent-color: var(--teal);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+/* ── SECTION LABEL ── */
+.sec-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px 24px;
+  margin-bottom: 20px;
+}
+
+.card:focus-within { border-color: rgba(26,191,184,0.3); }
+
+/* ── FORM ELEMENTS ── */
+label.field-lbl {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+input[type=text], input[type=date], input[type=number], select, textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 14px;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(26,191,184,0.12);
+}
+
+::placeholder { color: rgba(140,160,178,0.6); }
+select option { background: var(--navy2); }
+textarea { resize: vertical; min-height: 88px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width:520px){ .grid-2 { grid-template-columns: 1fr; } }
+
+/* ── LINE ITEMS ── */
+.line-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+  animation: slideDown 0.25s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.line-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.line-num {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.remove-btn:hover { background: rgba(224,82,82,0.12); }
+
+.add-line-btn {
+  width: 100%;
+  background: none;
+  border: 1px dashed rgba(26,191,184,0.3);
+  border-radius: 10px;
+  color: var(--teal);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 11px;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.add-line-btn:hover { background: rgba(26,191,184,0.06); border-color: var(--teal); }
+
+/* ── UPLOAD ── */
+.upload-zone {
+  border: 1.5px dashed rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.upload-zone:hover { border-color: var(--teal); background: rgba(26,191,184,0.04); }
+.upload-zone input { display: none; }
+
+.uploaded-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(76,175,130,0.1);
+  border: 1px solid rgba(76,175,130,0.25);
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--green);
+  margin-bottom: 14px;
+}
+
+.dont-know-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(26,191,184,0.06);
+  border: 1px solid rgba(26,191,184,0.18);
+  border-radius: 9px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.dont-know-row input { accent-color: var(--teal); cursor: pointer; }
+
+/* ── RIGHTS BOX ── */
+.rights-box {
+  background: rgba(26,191,184,0.06);
+  border: 1px solid rgba(26,191,184,0.18);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+.rights-title { font-size: 13px; font-weight: 600; color: var(--teal); margin-bottom: 12px; }
+.rights-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; margin-top: 1px; }
+.tag-refuse { background: rgba(224,82,82,0.15); color: #E05252; }
+.tag-must   { background: rgba(76,175,130,0.15); color: var(--green); }
+
+.tactics-box {
+  background: rgba(232,150,42,0.06);
+  border: 1px solid rgba(232,150,42,0.2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.tactics-title { font-size: 13px; font-weight: 600; color: var(--amber); margin-bottom: 8px; }
+
+/* ── ANALYSE BUTTON ── */
+.analyse-btn {
+  width: 100%;
+  background: var(--teal);
+  border: none;
+  border-radius: 14px;
+  color: var(--navy);
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 18px;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.analyse-btn:hover:not(:disabled) {
+  background: var(--teal2);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 30px rgba(26,191,184,0.25);
+}
+.analyse-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.disclaimer { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.6; }
+
+.error-msg {
+  display: none;
+  background: rgba(224,82,82,0.1);
+  border: 1px solid rgba(224,82,82,0.25);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--red);
+}
+.error-msg.show { display: block; animation: fadeIn 0.2s; }
+
+/* ── LOADING ── */
+.loading-view {
+  display: none;
+  text-align: center;
+  padding: 80px 24px;
+  position: relative;
+  z-index: 1;
+}
+.loading-view.show { display: block; }
+
+.pulse-ring {
+  width: 64px; height: 64px;
+  border: 3px solid rgba(26,191,184,0.2);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 24px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+.loading-title { font-family: 'Fraunces', serif; font-size: 22px; color: var(--white); margin-bottom: 8px; }
+.loading-sub { font-size: 13px; color: var(--muted); }
+
+/* ── RESULTS ── */
+.results-view { display: none; position: relative; z-index: 1; }
+.results-view.show { display: block; }
+
+.results-top-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.reset-top-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.reset-top-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+.results-header {
+  background: linear-gradient(135deg, rgba(26,191,184,0.12) 0%, rgba(232,197,71,0.06) 100%);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 28px;
+  margin-bottom: 28px;
+}
+
+.results-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.results-title { font-family: 'Fraunces', serif; font-size: 24px; color: var(--white); margin-bottom: 20px; }
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.metric-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.metric-val { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 700; display: block; line-height: 1; margin-bottom: 5px; }
+.metric-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+
+.finding {
+  border-left: 4px solid;
+  border-radius: 0 12px 12px 0;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  animation: slideDown 0.3s ease;
+}
+.finding.dispute { background: rgba(224,82,82,0.07); border-left-color: var(--red); }
+.finding.query   { background: rgba(232,150,42,0.07); border-left-color: var(--amber); }
+.finding.ok      { background: rgba(76,175,130,0.07); border-left-color: var(--green); }
+
+.finding-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+.finding.dispute .finding-label { color: var(--red); }
+.finding.query   .finding-label { color: var(--amber); }
+.finding.ok      .finding-label { color: var(--green); }
+
+.finding-type { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.finding-title { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 6px; }
+.finding-body { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+.script-box {
+  background: rgba(26,191,184,0.06);
+  border: 1px solid rgba(26,191,184,0.18);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: rgba(26,191,184,0.9);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.next-steps-box {
+  background: rgba(76,175,130,0.07);
+  border: 1px solid rgba(76,175,130,0.2);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-top: 24px;
+}
+.next-steps-title { font-family: 'Fraunces', serif; font-size: 16px; color: var(--green); margin-bottom: 14px; }
+.step-item { display: flex; gap: 12px; margin-bottom: 10px; font-size: 13px; color: var(--muted); line-height: 1.55; }
+.step-num { font-weight: 700; color: var(--green); flex-shrink: 0; font-family: 'Fraunces', serif; }
+
+.questions-box {
+  background: rgba(26,191,184,0.05);
+  border: 1px solid rgba(26,191,184,0.18);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-top: 20px;
+}
+.questions-title { font-family: 'Fraunces', serif; font-size: 16px; color: var(--teal); margin-bottom: 14px; }
+
+.no-findings {
+  background: rgba(76,175,130,0.07);
+  border: 1px solid rgba(76,175,130,0.2);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  color: var(--green);
+  font-size: 14px;
+}
+
+/* ── LETTER ── */
+.letter-trigger-btn {
+  width: 100%;
+  background: none;
+  border: 1px solid rgba(232,197,71,0.25);
+  border-radius: 12px;
+  color: var(--gold);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 14px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.letter-trigger-btn:hover { background: rgba(232,197,71,0.06); border-color: var(--gold); }
+
+.letter-box {
+  display: none;
+  background: rgba(232,197,71,0.04);
+  border: 1px solid rgba(232,197,71,0.2);
+  border-radius: 14px;
+  padding: 22px;
+  margin-top: 20px;
+}
+.letter-box.show { display: block; animation: fadeIn 0.3s; }
+.letter-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.letter-title { font-family: 'Fraunces', serif; font-size: 16px; color: var(--gold); }
+.letter-lang-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.letter-lang-row select { background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 7px; color: var(--cream); font-size: 12px; padding: 4px 10px; margin-bottom: 0; width: auto; }
+.letter-content {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  font-size: 13px;
+  color: var(--cream);
+  line-height: 1.9;
+  white-space: pre-wrap;
+  font-family: 'DM Sans', sans-serif;
+}
+.letter-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+.gen-letter-btn {
+  background: none;
+  border: 1px solid rgba(232,197,71,0.3);
+  border-radius: 9px;
+  color: var(--gold);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.gen-letter-btn:hover { background: rgba(232,197,71,0.08); }
+.gen-letter-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.dl-btn {
+  background: var(--gold);
+  border: none;
+  border-radius: 9px;
+  color: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.dl-btn:hover { opacity: 0.85; }
+
+/* ── ITEM LETTER ── */
+.item-letter-row { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+.item-letter-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 11px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.item-letter-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.item-letter-content {
+  margin-top: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--cream);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* ── RESET ── */
+.reset-btn {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 14px;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.reset-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+.privacy-note { font-size: 11px; color: rgba(140,160,178,0.6); text-align: center; margin-top: 18px; line-height: 1.6; }
+
+/* ── NOTICE ── */
+.lang-notice {
+  display: none;
+  background: rgba(26,191,184,0.06);
+  border: 1px solid rgba(26,191,184,0.18);
+  border-radius: 9px;
+  padding: 9px 14px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: var(--teal);
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 40px 24px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+footer strong { color: var(--teal); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-icon">⚕</div>
+    Bill<span>Guard</span>
+  </a>
+  <div class="nav-right">
+    <div class="lang-pill">
+      🌐
+      <select id="langSelect" onchange="onLangChange()">
+        <option value="en">English</option>
+        <option value="am">አማርኛ (Amharic)</option>
+        <option value="ar">العربية (Arabic)</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="tr">Türkçe (Turkish)</option>
+        <option value="th">ภาษาไทย (Thai)</option>
+        <option value="fr">Français (French)</option>
+        <option value="de">Deutsch (German)</option>
+        <option value="es">Español (Spanish)</option>
+        <option value="pt">Português (Portuguese)</option>
+        <option value="ru">Русский (Russian)</option>
+        <option value="zh">中文 (Chinese)</option>
+        <option value="so">Soomaali (Somali)</option>
+        <option value="sw">Kiswahili (Swahili)</option>
+      </select>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge" id="heroBadge">Built by healthcare audit professionals</div>
+  <h1>Your hospital bill<br><em>probably has errors</em></h1>
+  <p class="hero-sub" id="heroSub">Studies show 80% of hospital bills contain at least one mistake. The average overcharge is £400–£1,500 ($500–$2,000) per stay. BillGuard helps you find them — and dispute them.</p>
+  <div class="stats-row">
+    <div class="stat-item"><span class="stat-num">80%</span><span class="stat-label" id="stat2lbl">Bills have errors</span></div>
+    <div class="stat-item"><span class="stat-num">15</span><span class="stat-label" id="stat1lbl">Error types checked</span></div>
+    <div class="stat-item"><span class="stat-num">0</span><span class="stat-label" id="stat3lbl">Data stored</span></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LANG NOTICE -->
+  <div class="lang-notice" id="langNotice"></div>
+
+  <!-- TABS -->
+  <div class="tab-row">
+    <button class="tab-btn active" id="tab-itemised" onclick="switchMode('itemised')">📄 <span id="tabItemisedLabel">Itemised bill</span></button>
+    <button class="tab-btn" id="tab-package"  onclick="switchMode('package')" ><span id="tabPackageLabel">✈️ Medical tourism (received bill)</span></button>
+    <button class="tab-btn" id="tab-precheck" onclick="switchMode('precheck')"><span id="tabPreCheckLabel">🔍 Before you sign</span></button>
+  </div>
+
+  <!-- CONSENT -->
+  <div class="consent-box">
+    <input type="checkbox" id="consentCheck" onchange="updateBtn()">
+    <span id="consentText">Your bill details are processed by AI to identify errors and immediately discarded — nothing is stored or saved. Tick to confirm you understand and consent.</span>
+  </div>
+
+  <!-- ══ ITEMISED FORM ══ -->
+  <div id="form-itemised">
+    <div class="sec-label" id="secAdmission">Admission details</div>
+    <div class="card">
+      <div class="grid-2">
+        <div><label class="field-lbl" id="lCountry">Country treated in</label><input type="text" id="i-country" placeholder="e.g. India, UK, USA, Turkey"></div>
+        <div><label class="field-lbl" id="lAdmitType">Admission type</label>
+          <select id="i-type">
+            <option value="" id="optSelect">Select...</option>
+            <option id="optEmergency">Emergency</option>
+            <option id="optElective">Elective / Planned</option>
+            <option id="optDayCase">Day Case</option>
+            <option id="optOutpatient">Outpatient</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div><label class="field-lbl" id="lAdmitted">Admitted</label><input type="date" id="i-admit"></div>
+        <div><label class="field-lbl" id="lDischarged">Discharged</label><input type="date" id="i-discharge"></div>
+      </div>
+      <label class="field-lbl" id="lTotal">Total billed</label>
+      <input type="text" id="i-total" placeholder="e.g. 4,250 / $4,250 / £4,250">
+      <label class="field-lbl" id="lProcedure">Procedure / reason (plain language)</label>
+      <textarea id="i-procedure" rows="2" placeholder="e.g. gallbladder removal, knee surgery"></textarea>
+    </div>
+
+    <div class="sec-label" id="secCharges">Itemised charges</div>
+    <div class="card">
+      <div id="line-items-container"></div>
+      <button class="add-line-btn" onclick="addLine()" id="addChargeBtn">+ Add another charge</button>
+    </div>
+
+    <div class="sec-label" id="secFeelings">Anything feel off?</div>
+    <div class="card">
+      <label class="field-lbl" id="lConcerns">Tell us anything that seemed wrong or unusual</label>
+      <textarea id="i-concerns" rows="3" placeholder="e.g. I was charged for physio but was discharged before the session..."></textarea>
+    </div>
+  </div>
+
+  <!-- ══ PACKAGE FORM ══ -->
+  <div id="form-package" style="display:none">
+    <div class="sec-label" id="secRights">Your rights — know this first</div>
+    <div class="rights-box">
+      <div class="rights-title" id="rightsTitle">🛡️ Charges that were not in your agreed package</div>
+      <div id="rightsList">
+        <div class="rights-item"><span class="tag tag-refuse" id="tagRefuse">Can refuse</span><span id="right1">Charges not included in your written package agreement</span></div>
+        <div class="rights-item"><span class="tag tag-refuse" id="tagRefuse2">Can refuse</span><span id="right2">Services not requested or consented to by you</span></div>
+        <div class="rights-item"><span class="tag tag-refuse" id="tagRefuse3">Can refuse</span><span id="right3">Items added without your knowledge or signature</span></div>
+        <div class="rights-item"><span class="tag tag-refuse" id="tagRefuse4">Can refuse</span><span id="right4">Standard surgical consumables (gloves, drapes, syringes)</span></div>
+        <div class="rights-item"><span class="tag tag-must" id="tagMust">Must pay</span><span id="right5">Genuine medical emergencies during your stay</span></div>
+        <div class="rights-item"><span class="tag tag-must" id="tagMust2">Must pay</span><span id="right6">Extras you explicitly requested and agreed to in writing</span></div>
+      </div>
+    </div>
+    <div class="tactics-box">
+      <div class="tactics-title" id="tacticsTitle">⚠️ Common tactics used by hospitals abroad</div>
+      <p id="tacticsText">Hospitals sometimes add consumables as separate line items even when included in packages. Theatre time is rounded up. Monitoring fees appear for doctors you never saw. Always request a fully itemised bill before paying anything.</p>
+    </div>
+
+    <div class="sec-label" id="secPackage">Your package details</div>
+    <div class="card">
+      <div class="grid-2">
+        <div><label class="field-lbl" id="lCountryHosp">Country / hospital</label><input type="text" id="p-country" placeholder="e.g. Apollo Hospital, India"></div>
+        <div><label class="field-lbl" id="lTreatType">Type of treatment</label><input type="text" id="p-treatment" placeholder="e.g. knee replacement, IVF"></div>
+      </div>
+      <label class="field-lbl" id="lPackageIncl">What was included in your agreed package price?</label>
+      <textarea id="p-package" rows="3" placeholder="e.g. Surgery, 3 nights, meals, pre-op tests, post-op care. Price: £3,500"></textarea>
+      <div class="upload-zone" onclick="this.querySelector('input').click()">
+        <input type="file" accept="image/*,.pdf" onchange="handleFile(this,'pkgDoc')">
+        <span id="pkgDocDisplay">📎 Upload your package agreement (photo, screenshot or PDF)</span>
+      </div>
+
+      <label class="field-lbl" id="lExtraCharges">What extra charges appeared on your final bill?</label>
+      <div class="dont-know-row">
+        <input type="checkbox" id="dontKnowCheck" onchange="toggleDontKnow()">
+        <label for="dontKnowCheck" id="dontKnowLabel">I haven't received a detailed breakdown yet</label>
+      </div>
+      <div id="extrasArea"><textarea id="p-extras" rows="4" placeholder="e.g. Surgeon gloves £85, monitoring fee £300, physio £150 (never received)..."></textarea></div>
+      <div id="dontKnowNote" style="display:none; font-size:12px; color:var(--teal); margin-bottom:12px; padding:8px 12px; background:rgba(26,191,184,0.06); border-radius:8px;">No problem — the AI will flag common hidden charges based on your package type.</div>
+
+      <div class="upload-zone" onclick="this.querySelector('input').click()">
+        <input type="file" accept="image/*,.pdf" onchange="handleFile(this,'invDoc')">
+        <span id="invDocDisplay">📎 Upload your hospital invoice (photo, screenshot or PDF)</span>
+      </div>
+      <div class="grid-2">
+        <div><label class="field-lbl" id="lOrigPrice">Original agreed price</label><input type="text" id="p-original" placeholder="e.g. £3,500"></div>
+        <div><label class="field-lbl" id="lFinalCharge">Total they are now charging</label><input type="text" id="p-final" placeholder="e.g. £5,200"></div>
+      </div>
+      <label class="field-lbl" id="lSigned">Did you sign anything on arrival or during your stay?</label>
+      <textarea id="p-signed" rows="2" placeholder="e.g. I signed consent for surgery but nothing about extra charges..."></textarea>
+    </div>
+  </div>
+
+  <!-- ══ PRE-CHECK FORM ══ -->
+  <div id="form-precheck" style="display:none">
+    <div class="rights-box" style="background:rgba(26,191,184,0.06); border-color:rgba(26,191,184,0.2); margin-bottom:20px;">
+      <div class="rights-title" id="preCheckInfoTitle">🔍 Pre-check — before you sign anything</div>
+      <p style="font-size:13px; color:var(--muted); line-height:1.65;" id="preCheckInfoText">Paste your package offer below or upload the document. AI will flag red flags, hidden costs, and questions you should ask before committing.</p>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div><label class="field-lbl" id="lTreatPre">What treatment is this package for?</label><input type="text" id="pc-treatment" placeholder="e.g. knee replacement, IVF, dental"></div>
+        <div><label class="field-lbl" id="lCountryPre">Which country / hospital?</label><input type="text" id="pc-country" placeholder="e.g. Apollo Hospital, India"></div>
+      </div>
+      <label class="field-lbl" id="lBudget">Your budget or quoted price (optional)</label>
+      <input type="text" id="pc-budget" placeholder="e.g. £5,000 or $8,000">
+      <label class="field-lbl" id="lPreCheckText">Paste your package offer text here</label>
+      <textarea id="pc-text" rows="9" placeholder="Paste the full text of the package offer, quote, or treatment plan. Include all prices, inclusions, exclusions and terms shown."></textarea>
+      <div class="upload-zone" onclick="this.querySelector('input').click()">
+        <input type="file" accept="image/*,.pdf" onchange="handleFile(this,'pcDoc')">
+        <span id="pcDocDisplay">📎 Upload your package document (photo, screenshot or PDF)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSE BTN -->
+  <button class="analyse-btn" id="analyseBtn" disabled onclick="analyse()">
+    🔍 <span id="analyseBtnLabel">Analyse My Bill Now</span>
+  </button>
+  <div class="error-msg" id="errorMsg"></div>
+  <p class="disclaimer" id="disclaimerText">This tool identifies potential errors to investigate. It does not provide legal or medical advice.</p>
+</div>
+
+<!-- LOADING -->
+<div class="loading-view" id="loadingView">
+  <div class="pulse-ring"></div>
+  <p class="loading-title" id="loadingTitle">Analysing your bill...</p>
+  <p class="loading-sub" id="loadingSub">Checking 15 error categories · Professional audit methodology</p>
+</div>
+
+<!-- RESULTS -->
+<div class="results-view main" id="resultsView">
+  <div class="results-top-bar">
+    <button class="reset-top-btn" onclick="resetAll()" id="resetTopBtn">← Analyse another bill</button>
+  </div>
+  <div class="results-header">
+    <p class="results-label" id="resultsLabel">Analysis complete</p>
+    <p class="results-title" id="resultsTitle">Your bill analysis</p>
+    <div class="metrics-grid" id="metricsGrid"></div>
+  </div>
+  <div class="sec-label" id="findingsLabel">Detailed findings</div>
+  <div id="findingsList"></div>
+  <div id="questionsBox" style="display:none" class="questions-box">
+    <div class="questions-title" id="questionsTitle">Questions to ask before signing</div>
+    <div id="questionsList"></div>
+  </div>
+  <div id="nextStepsBox" class="next-steps-box" style="display:none">
+    <div class="next-steps-title" id="nextStepsTitle">Your next steps</div>
+    <div id="nextStepsList"></div>
+    <p id="overallAdvice" style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid rgba(76,175,130,0.2);font-style:italic;display:none"></p>
+  </div>
+  <button class="letter-trigger-btn" id="letterTriggerBtn" onclick="toggleLetter()" style="display:none">✉️ Generate dispute letter</button>
+  <div class="letter-box" id="letterBox">
+    <div class="letter-header">
+      <span class="letter-title" id="letterTitle">📄 Your dispute letter</span>
+      <div class="letter-lang-row">
+        <label id="letterLangLabel">Letter language:</label>
+        <select id="letterLangSel" onchange="onLetterLangChange()">
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
+    <div id="letterContent"></div>
+  </div>
+  <button class="reset-btn" onclick="resetAll()" id="resetBtn">← Analyse another bill</button>
+  <p class="privacy-note" id="privacyNote">🔒 Your data was processed and immediately discarded. Nothing has been stored.</p>
+</div>
+
+<footer>
+  <p><strong>BillGuard</strong> · Built by healthcare audit professionals · Works worldwide</p>
+  <p style="margin-top:6px">Your data is never stored · This tool does not provide legal advice</p>
+</footer>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────
+let mode = 'itemised', lang = 'en', results = null;
+let pkgDoc = null, invDoc = null, pcDoc = null;
+let letterData = {}, letterLoadingMap = {};
+let lineCount = 0, nextLineId = 1;
+let lineLabels = {desc:'Description',amt:'Amount',qty:'Quantity / units',date:'Date of service',unusual:'Anything unusual? (optional)',remove:'Remove',chargeNum:'Charge',descPh:'e.g. Operating theatre — 3 hours',amtPh:'e.g. £2,400',qtyPh:'e.g. 3 hrs, 20 tablets',unusualPh:"e.g. I don't remember receiving this"};
+
+// ── Languages ─────────────────────────────────────────────────────
+const LANGS = {
+  en:  {english:'English',   full:true},
+  am:  {english:'Amharic',   full:true},
+  ar:  {english:'Arabic',    full:false},
+  hi:  {english:'Hindi',     full:false},
+  tr:  {english:'Turkish',   full:false},
+  th:  {english:'Thai',      full:false},
+  fr:  {english:'French',    full:false},
+  de:  {english:'German',    full:false},
+  es:  {english:'Spanish',   full:false},
+  pt:  {english:'Portuguese',full:false},
+  ru:  {english:'Russian',   full:false},
+  zh:  {english:'Chinese',   full:false},
+  so:  {english:'Somali',    full:false},
+  sw:  {english:'Swahili',   full:false},
+};
+
+const T = {
+  en:{
+    heroSub:"Studies show 80% of hospital bills contain at least one mistake. The average overcharge is £400–£1,500 ($500–$2,000) per stay. BillGuard helps you find them — and dispute them.",
+    consent:"Your bill details are processed by AI to identify errors and immediately discarded — nothing is stored. Tick to confirm you consent.",
+    tabItemised:"📄 Itemised bill", tabPackage:"✈️ Medical tourism (received bill)", tabPreCheck:"🔍 Before you sign",
+    analyseBtn:"Analyse My Bill Now", preCheckBtn:"Pre-Check This Package",
+    loading:"Analysing your bill...", loadingSub:"Checking 15 error categories · Professional audit methodology",
+    loadingPre:"Checking your package...", loadingPreSub:"Reviewing for red flags and hidden costs",
+    resultsLabel:"Analysis complete", resultsTitle:"Your bill analysis",
+    preCheckLabel:"Pre-check complete", preCheckTitle:"Package pre-check results",
+    metricDispute:"Dispute", metricQuery:"Query", metricOk:"Looks OK",
+    metricRedFlag:"Red flags", metricClarify:"Clarify first", metricStandard:"Looks standard",
+    findings:"Detailed findings", nextSteps:"Your next steps",
+    disputeLabel:"Dispute", queryLabel:"Query", okLabel:"Looks OK",
+    redFlagLabel:"Red flag", clarifyLabel:"Clarify before signing", standardLabel:"Looks standard",
+    questionsToAsk:"Questions to ask before signing",
+    genLetterBtn:"Generate letter", letterTitle:"📄 Your dispute letter", letterLangLabel:"Letter language:",
+    generateLetterTrigger:"✉️ Generate dispute letter",
+    writeLetterIn:"Write letter", writeLetterEn:"Write letter (English)",
+    tryAgain:"Failed — try again", downloading:"Downloading...", downloaded:"✅ Downloaded",
+    noFindings:"No issues found — your bill looks clean based on the information provided.",
+    privacy:"Your data was processed and immediately discarded. Nothing has been stored.",
+    resetBtn:"← Analyse another bill",
+    errConsent:"Please tick the consent box to continue.",
+    errCharge:"Please add at least one charge description before analysing.",
+    errExtras:"Please describe the extra charges, or tick the checkbox if you haven't received a detailed breakdown.",
+    errPackage:"Please paste your package offer text or upload a document.",
+    disclaimer:"This tool identifies potential errors to investigate. It does not provide legal or medical advice.",
+    dontKnow:"I haven't received a detailed breakdown yet",
+    dontKnowNote:"No problem — the AI will flag common hidden charges based on your package type.",
+    langNotice:"UI is in English. AI analysis results will be in",
+    uploadDone:"✅ File ready:",
+    unsupportedFile:"⚠️ Please use an image or PDF file",
+    download:"⬇ Download",
+    chargeNum:"Charge",
+    liDesc:"Description", liAmt:"Amount", liQty:"Quantity / units", liDate:"Date of service",
+    liUnusual:"Anything unusual? (optional)", liRemove:"Remove",
+    liDescPh:"e.g. Operating theatre — 3 hours", liAmtPh:"e.g. £2,400", liQtyPh:"e.g. 3 hrs, 20 tablets",
+    liUnusualPh:"e.g. I don't remember receiving this",
+    addCharge:"+ Add another charge",
+    heroBadge:"Built by healthcare audit professionals",
+  },
+  am:{
+    heroSub:"ጥናቶች እንደሚያሳዩት 80% የሆስፒታል ሂሳቦች ቢያንስ አንድ ስህተት አላቸው። አማካይ ትርፍ ክፍያ ከ £400 ($500) እስከ £1,500 ($2,000) ነው። BillGuard ስህተቶቹን እንዲያገኙ ይረዳዎታል።",
+    consent:"ስህተቶችን ለመለየት ዝርዝርዎ በ AI ይሠራል እና ወዲያውኑ ይሰረዛል — ምንም አይቀመጥም። ያረጋግጡ።",
+    tabItemised:"📄 ዝርዝር ሂሳብ", tabPackage:"✈️ የወጭ ሕክምና (ሂሳብ ደርሶኛል)", tabPreCheck:"🔍 ከፈረሙ በፊት",
+    analyseBtn:"ሂሳቤን አሁን ይመርምሩ", preCheckBtn:"ፓኬጁን አሁን ፈትሽ",
+    loading:"ሂሳብዎ እየተመረመረ ነው...", loadingSub:"15 ምድቦች እየተፈተሹ ናቸው",
+    loadingPre:"ፓኬጁ እየተፈተሸ ነው...", loadingPreSub:"ሊደበቁ ወጪዎች ይፈተሻሉ",
+    resultsLabel:"ምርመራ ተጠናቅቋል", resultsTitle:"የሂሳብ ትንታኔ",
+    preCheckLabel:"ፍተሻ ተጠናቅቋል", preCheckTitle:"የፓኬጅ ፍተሻ ውጤት",
+    metricDispute:"ይሞግቱ", metricQuery:"ይጠይቁ", metricOk:"ትክክል ይመስላል",
+    metricRedFlag:"ቀይ ምልክቶች", metricClarify:"ያብራሩ", metricStandard:"ደህና ይመስላል",
+    findings:"ዝርዝር ውጤቶች", nextSteps:"ቀጣይ እርምጃዎች",
+    disputeLabel:"ይሞግቱ", queryLabel:"ይጠይቁ", okLabel:"ትክክል ይመስላል",
+    redFlagLabel:"አደጋ", clarifyLabel:"ከፈረሙ በፊት ያብራሩ", standardLabel:"ደህና ይመስላል",
+    questionsToAsk:"ከፈረሙ በፊት የሚጠይቋቸው ጥያቄዎች",
+    genLetterBtn:"ደብዳቤ ፍጠር", letterTitle:"📄 የሞግት ደብዳቤ", letterLangLabel:"የደብዳቤ ቋንቋ:",
+    generateLetterTrigger:"✉️ የሞግት ደብዳቤ ፍጠሩ",
+    writeLetterIn:"ደብዳቤ ፍጠር", writeLetterEn:"ደብዳቤ ፍጠር (English)",
+    tryAgain:"አልተሳካም — እንደገና ሞክሩ", downloading:"እየወረደ...", downloaded:"✅ ወርዷል",
+    noFindings:"ምንም ስህተት አልተገኘም — ሂሳብዎ ትክክለኛ ይመስላል።",
+    privacy:"ዳታዎ ወዲያውኑ ተሰርዟል። ምንም አልተቀመጠም።",
+    resetBtn:"← ሌላ ሂሳብ ይመርምሩ",
+    errConsent:"ለመቀጠል ፈቃድ ያድርጉ።",
+    errCharge:"ቢያንስ አንድ ክፍያ ዝርዝር ያክሉ።",
+    errExtras:"የተጨመሩ ክፍያዎችን ይግለጹ ወይም ሳጥኑን ምልክት ያድርጉ።",
+    errPackage:"የፓኬጅ ጽሑፉን ያስገቡ ወይም ሰነድ ይስቀሉ።",
+    disclaimer:"ይህ መሳሪያ ሊሆኑ ስህተቶችን ይለያል። ህጋዊ ምክር አይሰጥም።",
+    dontKnow:"ዝርዝር ሂሳብ ገና አልደረሰኝም",
+    dontKnowNote:"ችግር የለም — AI የፓኬጁን ዓይነት ተጠቅሞ ሊደበቁ ወጪዎችን ያሳያዎታል።",
+    langNotice:"",
+    uploadDone:"✅ ፋይል ዝግጁ ነው:",
+    unsupportedFile:"⚠️ እባክዎ ፎቶ ወይም PDF ይጠቀሙ",
+    download:"⬇ አውርድ",
+    // Form labels - itemised
+    secAdmission:"የመግቢያ ዝርዝሮች",
+    lCountry:"የታከሙበት ሀገር",
+    lAdmitType:"የመግቢያ ዓይነት",
+    optSelect:"ይምረጡ...",
+    optEmergency:"ድንገተኛ",
+    optElective:"የታቀደ",
+    optDayCase:"ቀን ጉብኝት",
+    optOutpatient:"ውጪ ሕሙም",
+    lAdmitted:"የገቡበት ቀን",
+    lDischarged:"የወጡበት ቀን",
+    lTotal:"ጠቅላላ ክፍያ",
+    lProcedure:"ሕክምናው (ቀላል ቋንቋ)",
+    secCharges:"ዝርዝር ክፍያዎች",
+    addCharge:"+ ሌላ ክፍያ ያክሉ",
+    secFeelings:"ምንም ስህተት ይመስልዎታል?",
+    lConcerns:"ያልተለመደ ነገር ካለ ይግለጹ",
+    // Line item labels
+    liDesc:"ዝርዝር", liAmt:"መጠን", liQty:"ብዛት", liDate:"የአገልግሎት ቀን",
+    liUnusual:"ያልተለመደ? (አማራጭ)", liRemove:"አስወግዱ",
+    liDescPh:"ለምሳሌ: ቀዶ ጥገና ክፍል — 3 ሰዓት",
+    liAmtPh:"ለምሳሌ: £2,400", liQtyPh:"ለምሳሌ: 3 ሰዓት",
+    liUnusualPh:"ለምሳሌ: ይህን አገልግሎት ያገኘሁ አይመስለኝም",
+    // Package form
+    secRights:"መብቶችዎ — ያውቁ",
+    rightsTitle:"🛡️ ስምምነቱ ያልነበሩ ክፍያዎች",
+    tagRefuse:"መክፈል አያስፈልግም",
+    tagMust:"መክፈል ያስፈልጋል",
+    right1:"ስምምነቱ ያልተካተቱ ክፍያዎች",
+    right2:"ያልጠየቋቸው አገልግሎቶች",
+    right3:"ያለ ፊርማ የተጨመሩ ነገሮች",
+    right4:"መደበኛ የቀዶ ጥገና እቃዎች (ጓንቶ፣ ጨርቅ፣ መርፌ)",
+    right5:"ድንገተኛ ሕክምናዎች",
+    right6:"በጽሑፍ የተስማሙባቸው ተጨማሪ አገልግሎቶች",
+    tacticsTitle:"⚠️ ብዙ ጊዜ የሚታዩ ዘዴዎች",
+    tacticsText:"ሆስፒታሎች ዕቃዎችን ለብቻ ያስከፍላሉ፣ ጊዜ ይጨምራሉ፣ ያላዩዋቸው ዶክተሮች ያክሉበታል። ምንም ሳይከፍሉ ዝርዝር ሂሳብ ይጠይቁ።",
+    secPackage:"የፓኬጅ ዝርዝሮች",
+    lCountryHosp:"ሀገር / ሆስፒታል",
+    lTreatType:"የሕክምና ዓይነት",
+    lPackageIncl:"ፓኬጁ ምን ይካተታል?",
+    pkgUpload:"📎 የፓኬጅ ስምምነት ይስቀሉ (ፎቶ፣ ስክሪንሾት ወይም PDF)",
+    lExtraCharges:"ምን ተጨማሪ ክፍያዎች ታዩ?",
+    invUpload:"📎 ሆስፒታሉ ሂሳብ ይስቀሉ (ፎቶ፣ ስክሪንሾት ወይም PDF)",
+    lOrigPrice:"ዋናው ዋጋ",
+    lFinalCharge:"አሁን ጠቅላላ",
+    lSigned:"ሰነድ ፈርመዋል?",
+    // Pre-check
+    preCheckInfoTitle:"🔍 ከፈረሙ በፊት ፈትሽ",
+    preCheckInfoText:"የፓኬጅ ፕሮፖዛሉን ይለጥፉ ወይም ይስቀሉ። AI ሳይንጹ ነጥቦች፣ ሊደበቁ ወጪዎች ያሳያዎታል።",
+    lTreatPre:"ሕክምናው ምንድን ነው?",
+    lCountryPre:"ሀገር / ሆስፒታል",
+    lBudget:"በጀትዎ (አማራጭ)",
+    lPreCheckText:"የፓኬጅ ፕሮፖዛሉን ይለጥፉ",
+    pcUpload:"📎 ፓኬጅ ሰነድ ይስቀሉ (ፎቶ፣ ስክሪንሾት ወይም PDF)",
+    // Results
+    findingsLabel:"ዝርዝር ውጤቶች",
+    nextStepsTitle:"ቀጣይ እርምጃዎች",
+    privacyNote:"🔒 ዳታዎ ወዲያውኑ ተሰርዟል። ምንም አልተቀመጠም።",
+    resetTopBtn:"← ሌላ ሂሳብ ይመርምሩ",
+    heroBadge:"በጤና ምርመራ ባለሙያዎች የተሰራ",
+    stat1lbl:"የስህተት ዓይነቶች",
+    stat2lbl:"ሂሳቦች ስህተት አላቸው",
+    stat3lbl:"ምንም ዳታ አይቀመጥም",
+  },
+};
+
+const t = () => T[lang] || T.en;
+const eng = () => LANGS[lang]?.english || 'English';
+
+// ── Init ──────────────────────────────────────────────────────────
+function init() {
+  addLine();
+  updateBtn();
+}
+
+// ── Language ──────────────────────────────────────────────────────
+function onLangChange() {
+  lang = document.getElementById('langSelect').value;
+  applyTranslations();
+  updateLetterLangOptions();
+}
+
+function applyTranslations() {
+  const tr = t();
+  const setT = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v||''; };
+  const setP = (id, v) => { const el = document.getElementById(id); if(el && v) el.placeholder = v; };
+  const setA = (sel, v) => { const el = document.querySelector(sel); if(el && v) el.textContent = v; };
+
+  // Hero / core
+  setT('heroSub', tr.heroSub);
+  setT('heroBadge', tr.heroBadge||'Built by healthcare audit professionals');
+  setT('stat1lbl', tr.stat1lbl||'Error types checked');
+  setT('stat2lbl', tr.stat2lbl||'Bills have errors');
+  setT('stat3lbl', tr.stat3lbl||'Data stored');
+  setT('consentText', tr.consent);
+  setT('analyseBtnLabel', mode==='precheck'?tr.preCheckBtn:tr.analyseBtn);
+  setT('disclaimerText', tr.disclaimer);
+  setT('loadingTitle', mode==='precheck'?tr.loadingPre:tr.loading);
+  setT('loadingSub', mode==='precheck'?tr.loadingPreSub:tr.loadingSub);
+  setT('resetBtn', tr.resetBtn);
+  setT('resetTopBtn', tr.resetBtn||tr.resetBtn);
+
+  // Tabs
+  setA('#tab-itemised span', tr.tabItemised);
+  setA('#tab-package span', tr.tabPackage);
+  setA('#tab-precheck span', tr.tabPreCheck);
+
+  // Itemised form labels
+  setT('secAdmission', tr.secAdmission||'Admission details');
+  setT('lCountry', tr.lCountry||'Country treated in');
+  setT('lAdmitType', tr.lAdmitType||'Admission type');
+  setT('lAdmitted', tr.lAdmitted||'Admitted');
+  setT('lDischarged', tr.lDischarged||'Discharged');
+  setT('lTotal', tr.lTotal||'Total billed');
+  setT('lProcedure', tr.lProcedure||'Procedure / reason (plain language)');
+  setT('secCharges', tr.secCharges||'Itemised charges');
+  setT('addChargeBtn', tr.addCharge||'+ Add another charge');
+  setT('secFeelings', tr.secFeelings||'Anything feel off?');
+  setT('lConcerns', tr.lConcerns||'Tell us anything that seemed wrong or unusual');
+
+  // Admission type options
+  setT('optSelect', tr.optSelect||'Select...');
+  setT('optEmergency', tr.optEmergency||'Emergency');
+  setT('optElective', tr.optElective||'Elective / Planned');
+  setT('optDayCase', tr.optDayCase||'Day Case');
+  setT('optOutpatient', tr.optOutpatient||'Outpatient');
+
+  // Package form labels
+  setT('secRights', tr.secRights||'Your rights — know this first');
+  setT('rightsTitle', tr.rightsTitle||'🛡️ Charges that were not in your agreed package');
+  setT('tagRefuse', tr.tagRefuse||'Can refuse');
+  setT('tagRefuse2', tr.tagRefuse||'Can refuse');
+  setT('tagRefuse3', tr.tagRefuse||'Can refuse');
+  setT('tagRefuse4', tr.tagRefuse||'Can refuse');
+  setT('tagMust', tr.tagMust||'Must pay');
+  setT('tagMust2', tr.tagMust||'Must pay');
+  setT('right1', tr.right1||'Charges not included in your written package agreement');
+  setT('right2', tr.right2||'Services not requested or consented to by you');
+  setT('right3', tr.right3||'Items added without your knowledge or signature');
+  setT('right4', tr.right4||'Standard surgical consumables (gloves, drapes, syringes)');
+  setT('right5', tr.right5||'Genuine medical emergencies during your stay');
+  setT('right6', tr.right6||'Extras you explicitly requested and agreed to in writing');
+  setT('tacticsTitle', tr.tacticsTitle||'⚠️ Common tactics used by hospitals abroad');
+  setT('tacticsText', tr.tacticsText||'Hospitals sometimes add consumables as separate line items. Theatre time is rounded up. Monitoring fees appear for doctors you never saw.');
+  setT('secPackage', tr.secPackage||'Your package details');
+  setT('lCountryHosp', tr.lCountryHosp||'Country / hospital');
+  setT('lTreatType', tr.lTreatType||'Type of treatment');
+  setT('lPackageIncl', tr.lPackageIncl||'What was included in your agreed package price?');
+  setT('pkgDocDisplay', tr.pkgUpload||'📎 Upload your package agreement (photo, screenshot or PDF)');
+  setT('lExtraCharges', tr.lExtraCharges||'What extra charges appeared on your final bill?');
+  setT('invDocDisplay', tr.invUpload||'📎 Upload your hospital invoice (photo, screenshot or PDF)');
+  setT('lOrigPrice', tr.lOrigPrice||'Original agreed price');
+  setT('lFinalCharge', tr.lFinalCharge||'Total they are now charging');
+  setT('lSigned', tr.lSigned||'Did you sign anything on arrival or during your stay?');
+
+  // Pre-check labels
+  setT('preCheckInfoTitle', tr.preCheckInfoTitle||'🔍 Pre-check — before you sign anything');
+  setT('preCheckInfoText', tr.preCheckInfoText||'Paste your package offer below or upload the document. AI will flag red flags and questions you should ask before committing.');
+  setT('lTreatPre', tr.lTreatPre||'What treatment is this package for?');
+  setT('lCountryPre', tr.lCountryPre||'Which country / hospital?');
+  setT('lBudget', tr.lBudget||'Your budget or quoted price (optional)');
+  setT('lPreCheckText', tr.lPreCheckText||'Paste your package offer text here');
+  setT('pcDocDisplay', tr.pcUpload||'📎 Upload your package document (photo, screenshot or PDF)');
+
+  // Dont know label
+  setT('dontKnowLabel', tr.dontKnow||"I haven't received a detailed breakdown yet");
+  const dkNote = document.getElementById('dontKnowNote');
+  if(dkNote) dkNote.textContent = tr.dontKnowNote||'No problem — the AI will flag common hidden charges based on your package type.';
+
+  // Results labels
+  setT('findingsLabel', tr.findings||'Detailed findings');
+  setT('privacyNote', tr.privacy||'🔒 Your data was processed and immediately discarded. Nothing has been stored.');
+
+  // Letter
+  setT('letterTitle', tr.letterTitle);
+  setT('letterLangLabel', tr.letterLangLabel);
+  const ltb = document.getElementById('letterTriggerBtn');
+  if(ltb) ltb.textContent = tr.generateLetterTrigger;
+
+  // Line items dynamically added — update label vars used in addLine()
+  // (stored in lineLabels so addLine() picks them up)
+  lineLabels = {
+    desc: tr.liDesc||'Description',
+    amt:  tr.liAmt||'Amount',
+    qty:  tr.liQty||'Quantity / units',
+    date: tr.liDate||'Date of service',
+    unusual: tr.liUnusual||'Anything unusual? (optional)',
+    remove: tr.liRemove||'Remove',
+    chargeNum: tr.chargeNum||'Charge',
+    descPh: tr.liDescPh||'e.g. Operating theatre — 3 hours',
+    amtPh:  tr.liAmtPh||'e.g. £2,400',
+    qtyPh:  tr.liQtyPh||'e.g. 3 hrs, 20 tablets',
+    unusualPh: tr.liUnusualPh||"e.g. I don't remember receiving this",
+  };
+
+  // Re-render existing line items with new language
+  rerenderLines();
+
+  // Lang notice
+  const notice = document.getElementById('langNotice');
+  if(lang !== 'en' && !LANGS[lang]?.full) {
+    notice.style.display = 'block';
+    notice.textContent = `ℹ️ ${tr.langNotice||'UI is in English. AI analysis results will be in'} ${eng()}.`;
+  } else {
+    notice.style.display = 'none';
+  }
+}
+
+// ── Re-render existing line items when language changes ───────────
+function rerenderLines() {
+  const container = document.getElementById('line-items-container');
+  if(!container) return;
+  const ll = lineLabels;
+  container.querySelectorAll('.line-item').forEach((item, i) => {
+    // Update labels
+    const lbls = item.querySelectorAll('.field-lbl');
+    const labels = [ll.desc, ll.amt, ll.qty, ll.date, ll.unusual];
+    lbls.forEach((lbl, j) => { if(labels[j]) lbl.textContent = labels[j]; });
+    // Update charge num
+    const numEl = item.querySelector('.line-num');
+    if(numEl) numEl.textContent = ll.chargeNum + ' #' + (i+1);
+    // Update remove btn
+    const rmBtn = item.querySelector('.remove-btn');
+    if(rmBtn) rmBtn.textContent = ll.remove;
+    // Update placeholders
+    const descI = item.querySelector('.li-desc'); if(descI) descI.placeholder = ll.descPh;
+    const amtI  = item.querySelector('.li-amt');  if(amtI)  amtI.placeholder  = ll.amtPh;
+    const qtyI  = item.querySelector('.li-qty');  if(qtyI)  qtyI.placeholder  = ll.qtyPh;
+    const noteI = item.querySelector('.li-note'); if(noteI) noteI.placeholder = ll.unusualPh;
+  });
+}
+
+// ── Mode switch ───────────────────────────────────────────────────
+function switchMode(m) {
+  mode = m;
+  ['itemised','package','precheck'].forEach(id => {
+    document.getElementById('form-'+id).style.display = id===m ? 'block' : 'none';
+    document.getElementById('tab-'+id).classList.toggle('active', id===m);
+  });
+  document.getElementById('analyseBtnLabel').textContent =
+    m==='precheck' ? t().preCheckBtn : t().analyseBtn;
+  document.getElementById('loadingTitle').textContent = m==='precheck'?t().loadingPre:t().loading;
+  document.getElementById('loadingSub').textContent   = m==='precheck'?t().loadingPreSub:t().loadingSub;
+  // Reset stale state on tab switch
+  document.getElementById('dontKnowCheck').checked = false;
+  toggleDontKnow();
+  clearError();
+}
+
+// ── Consent ───────────────────────────────────────────────────────
+function updateBtn() {
+  document.getElementById('analyseBtn').disabled = !document.getElementById('consentCheck').checked;
+}
+
+// ── Line items ────────────────────────────────────────────────────
+function addLine() {
+  const id = nextLineId++;
+  const c  = document.getElementById('line-items-container');
+  const d  = document.createElement('div');
+  d.className = 'line-item';
+  d.id = 'line-'+id;
+  const ll = lineLabels;
+  d.innerHTML = `
+    <div class="line-header">
+      <span class="line-num">${ll.chargeNum} #${c.children.length+1}</span>
+      ${c.children.length > 0 ? `<button class="remove-btn" onclick="removeLine(${id})">${ll.remove}</button>` : ''}
+    </div>
+    <div class="grid-2">
+      <div><label class="field-lbl">${ll.desc}</label><input type="text" class="li-desc" placeholder="${ll.descPh}"></div>
+      <div><label class="field-lbl">${ll.amt}</label><input type="text" class="li-amt" placeholder="${ll.amtPh}"></div>
+    </div>
+    <div class="grid-2">
+      <div><label class="field-lbl">${ll.qty}</label><input type="text" class="li-qty" placeholder="${ll.qtyPh}"></div>
+      <div><label class="field-lbl">${ll.date}</label><input type="date" class="li-date"></div>
+    </div>
+    <label class="field-lbl">${ll.unusual}</label>
+    <input type="text" class="li-note" placeholder="${ll.unusualPh}" style="margin-bottom:0">
+  `;
+  c.appendChild(d);
+  lineCount++;
+}
+
+function removeLine(id) {
+  const el = document.getElementById('line-'+id);
+  if(el) { el.remove(); lineCount = Math.max(0, lineCount-1); }
+}
+
+// ── File upload ───────────────────────────────────────────────────
+function handleFile(input, docKey) {
+  const file = input.files[0];
+  if(!file) return;
+  const displayId = docKey+'Display';
+  const isImage = file.type.startsWith('image/');
+  const isPdf   = file.type === 'application/pdf';
+  if(!isImage && !isPdf) {
+    document.getElementById(displayId).textContent = t().unsupportedFile;
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const base64 = e.target.result.split(',')[1];
+    const docObj = {name:file.name, base64, type:isImage?'image':'pdf', mediaType:file.type};
+    if(docKey==='pkgDoc') pkgDoc=docObj;
+    else if(docKey==='invDoc') invDoc=docObj;
+    else if(docKey==='pcDoc') pcDoc=docObj;
+    document.getElementById(displayId).textContent = `${t().uploadDone} ${file.name}`;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Don't know ────────────────────────────────────────────────────
+function toggleDontKnow() {
+  const checked = document.getElementById('dontKnowCheck').checked;
+  document.getElementById('extrasArea').style.display = checked?'none':'block';
+  document.getElementById('dontKnowNote').style.display = checked?'block':'none';
+}
+
+// ── Error handling ────────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function clearError() { document.getElementById('errorMsg').classList.remove('show'); }
+
+// ── Validate ──────────────────────────────────────────────────────
+function validate() {
+  if(!document.getElementById('consentCheck').checked) return t().errConsent;
+  if(mode==='itemised') {
+    const descs = document.querySelectorAll('.li-desc');
+    if(![...descs].some(d=>d.value.trim())) return t().errCharge;
+  }
+  if(mode==='package') {
+    const dontKnow = document.getElementById('dontKnowCheck').checked;
+    const extras   = document.getElementById('p-extras').value.trim();
+    if(!dontKnow && !extras) return t().errExtras;
+  }
+  if(mode==='precheck') {
+    if(!document.getElementById('pc-text').value.trim() && !pcDoc) return t().errPackage;
+  }
+  return null;
+}
+
+// ── Build prompts ─────────────────────────────────────────────────
+const LL = () => lang!=='en' ? `LANGUAGE RULE: Write ALL JSON text values in ${eng()}. NOT English. ${eng()} only.\n\n` : '';
+const LR = () => lang!=='en' ? `\n\nMUST: Every JSON value in ${eng()}.` : '';
+const SYS = () => lang==='en'
+  ? 'You are an NHS clinical audit professional. Respond ONLY with valid JSON, no markdown.'
+  : `You are an NHS clinical audit professional. CRITICAL: ALL JSON text values MUST be in ${eng()}. Every explanation, dispute_script, step, question MUST be in ${eng()}. JSON keys stay in English. Respond ONLY with valid JSON.`;
+
+function buildItemisedPrompt() {
+  const lines = [...document.querySelectorAll('.line-item')]
+    .filter(el=>el.querySelector('.li-desc')?.value.trim())
+    .map((el,i)=>`Charge ${i+1}: ${el.querySelector('.li-desc').value} | Amt:${el.querySelector('.li-amt').value||'?'} | Qty:${el.querySelector('.li-qty').value||'?'} | Date:${el.querySelector('.li-date').value||'?'} | Note:${el.querySelector('.li-note').value||'none'}`)
+    .join('; ');
+  const admit = document.getElementById('i-admit').value;
+  const disch = document.getElementById('i-discharge').value;
+  return `${LL()}Analyse for billing errors using these 15 categories: duplicate charges, upcoding, unbundling, service not received, wrong quantity, wrong patient info, date error, wrong admission type, undisclosed facility fee, pharmacy overcharge, theatre time overcharge, wrong consultant, expired code, insurance not applied, readmission error.
+BILL: Country:${document.getElementById('i-country').value||'?'} | Type:${document.getElementById('i-type').value||'?'} | Admitted:${admit||'?'} | Discharged:${disch||'?'} | Total:${document.getElementById('i-total').value||'?'} | Procedure:${document.getElementById('i-procedure').value||'?'} | Concerns:${document.getElementById('i-concerns').value||'none'}
+CHARGES: ${lines}
+Respond ONLY this JSON no markdown:
+{"summary":{"total_items":0,"items_to_dispute":0,"items_to_query":0,"items_ok":0},"findings":[{"charge":"name","status":"DISPUTE","error_type":"category","explanation":"reason","dispute_script":"what to say"}],"next_steps":["step1","step2","step3"],"overall_advice":"advice"}${LR()}`;
+}
+
+function buildPackagePrompt() {
+  const dontKnow = document.getElementById('dontKnowCheck').checked;
+  return `${LL()}Identify which extra charges are disputable vs legitimate. If extras unknown, flag common hidden charges for this treatment type.
+Package: ${document.getElementById('p-country').value||'?'} | Treatment:${document.getElementById('p-treatment').value||'?'} | Agreed:${document.getElementById('p-original').value||'?'} | Final:${document.getElementById('p-final').value||'?'}
+Included: ${document.getElementById('p-package').value||'not specified'}
+Extra charges: ${dontKnow?'Unknown — flag typical hidden charges for this package type':document.getElementById('p-extras').value}
+Signed: ${document.getElementById('p-signed').value||'nothing'}
+Respond ONLY this JSON no markdown:
+{"summary":{"total_items":0,"items_to_dispute":0,"items_to_query":0,"items_ok":0},"findings":[{"charge":"name","status":"DISPUTE","error_type":"reason","explanation":"why disputable","dispute_script":"what to say"}],"next_steps":["step1","step2","step3"],"overall_advice":"advice"}${LR()}`;
+}
+
+function buildPreCheckPrompt() {
+  return `${LL()}Review this medical package offer BEFORE the patient signs. Flag: RED_FLAG (serious concern/hidden cost/missing info), CLARIFY (needs clarification before signing), STANDARD (acceptable).
+Treatment: ${document.getElementById('pc-treatment').value||'?'} | Country: ${document.getElementById('pc-country').value||'?'} | Budget: ${document.getElementById('pc-budget').value||'not specified'}
+Package offer: ${document.getElementById('pc-text').value||'[see uploaded document]'}
+Respond ONLY this JSON no markdown:
+{"summary":{"total_items":0,"red_flags":0,"needs_clarification":0,"looks_ok":0},"findings":[{"item":"description","status":"RED_FLAG","explanation":"why concerning","action":"what to ask/do"}],"questions_to_ask":["q1","q2","q3"],"overall_advice":"advice"}${LR()}`;
+}
+
+function buildLetterPrompt(targetLang, items) {
+  const langInst = targetLang==='en' ? 'Write in English.' : `Write in ${targetLang} language.`;
+  return `Write a SHORT, formal dispute/enquiry letter. ${langInst} Maximum 150 words. Direct and to the point.
+Items to address: ${items.map(f=>`${f.charge||f.item}: ${f.explanation}`).join(' | ')}
+Format: Date:[DATE] | To: Billing Department | Subject: one line | Body: state issue, request correction/removal/clarification, one closing sentence. Sign: [PATIENT NAME] | Ref: [BILL REFERENCE]
+Respond with ONLY the letter text. No JSON. No markdown. Under 150 words.`;
+}
+
+// ── Safe parse JSON ───────────────────────────────────────────────
+function safeJSON(raw) {
+  raw = raw.trim().replace(/^```json|^```|```$/g,'').trim();
+  try { return JSON.parse(raw); } catch(_){}
+  const closings = ['"}]}','"}]','}]}','}','"}]}'];
+  for(const c of closings) { try { return JSON.parse(raw+c); } catch(_){} }
+  return null;
+}
+
+// ── API call ──────────────────────────────────────────────────────
+async function apiCall(messages, maxTok=3000) {
+  const content = [];
+  messages.forEach(m => {
+    if(m.docs) m.docs.filter(Boolean).forEach(d => {
+      if(d.type==='image') content.unshift({type:'image',source:{type:'base64',media_type:d.mediaType,data:d.base64}});
+      if(d.type==='pdf')   content.unshift({type:'document',source:{type:'base64',media_type:'application/pdf',data:d.base64}});
+    });
+    if(m.text) content.push({type:'text',text:m.text});
+  });
+  const res = await fetch('/api/analyse',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:maxTok, system:SYS(),
+      messages:[{role:'user', content:content.length>1?content:[{type:'text',text:content.find(c=>c.type==='text')?.text||''}]}]})
+  });
+  const data = await res.json();
+  if(!res.ok) throw new Error(data.error?.message||`API error ${res.status}`);
+  if(!data.content?.[0]?.text) throw new Error('Empty response from AI.');
+  return data.content[0].text;
+}
+
+// ── Analyse ───────────────────────────────────────────────────────
+async function analyse() {
+  const err = validate();
+  if(err) { showError(err); return; }
+  clearError();
+  results = null; letterData = {};
+  document.querySelector('.main').style.display = 'none';
+  document.getElementById('loadingView').classList.add('show');
+
+  try {
+    let raw, promptText, docs;
+    if(mode==='itemised')  { promptText=buildItemisedPrompt(); docs=[]; }
+    else if(mode==='package') { promptText=buildPackagePrompt(); docs=[pkgDoc,invDoc]; }
+    else                   { promptText=buildPreCheckPrompt(); docs=[pcDoc]; }
+
+    raw = await apiCall([{text:promptText, docs}], 3000);
+    const parsed = safeJSON(raw);
+    if(!parsed) throw new Error('Could not read AI response. Please try again.');
+    results = parsed;
+    renderResults();
+  } catch(e) {
+    document.querySelector('.main').style.display = 'block';
+    document.getElementById('loadingView').classList.remove('show');
+    showError('Something went wrong: ' + e.message);
+  }
+}
+
+// ── Render results ────────────────────────────────────────────────
+function renderResults() {
+  document.getElementById('loadingView').classList.remove('show');
+  const rv = document.getElementById('resultsView');
+  rv.classList.add('show');
+
+  const tr = t();
+  const isPreCheck = mode === 'precheck';
+  const s = results.summary || {};
+
+  document.getElementById('resultsLabel').textContent = isPreCheck ? tr.preCheckLabel : tr.resultsLabel;
+  document.getElementById('resultsTitle').textContent = isPreCheck ? tr.preCheckTitle  : tr.resultsTitle;
+
+  // Metrics
+  const mg = document.getElementById('metricsGrid');
+  if(isPreCheck) {
+    mg.innerHTML = `
+      <div class="metric-card"><span class="metric-val" style="color:var(--red)">${s.red_flags||0}</span><span class="metric-lbl">${tr.metricRedFlag}</span></div>
+      <div class="metric-card"><span class="metric-val" style="color:var(--amber)">${s.needs_clarification||0}</span><span class="metric-lbl">${tr.metricClarify}</span></div>
+      <div class="metric-card"><span class="metric-val" style="color:var(--green)">${s.looks_ok||0}</span><span class="metric-lbl">${tr.metricStandard}</span></div>`;
+  } else {
+    mg.innerHTML = `
+      <div class="metric-card"><span class="metric-val" style="color:var(--red)">${s.items_to_dispute||0}</span><span class="metric-lbl">${tr.metricDispute}</span></div>
+      <div class="metric-card"><span class="metric-val" style="color:var(--amber)">${s.items_to_query||0}</span><span class="metric-lbl">${tr.metricQuery}</span></div>
+      <div class="metric-card"><span class="metric-val" style="color:var(--green)">${s.items_ok||0}</span><span class="metric-lbl">${tr.metricOk}</span></div>`;
+  }
+
+  // Findings label
+  document.getElementById('findingsLabel').textContent = tr.findings;
+
+  // Findings
+  const fl = document.getElementById('findingsList');
+  fl.innerHTML = '';
+  const findings = results.findings || [];
+  if(findings.length===0) {
+    fl.innerHTML = `<div class="no-findings">✅ ${tr.noFindings}</div>`;
+  } else {
+    const statusMap = {
+      DISPUTE:  {cls:'dispute', lb:tr.disputeLabel},
+      QUERY:    {cls:'query',   lb:tr.queryLabel},
+      OK:       {cls:'ok',      lb:tr.okLabel},
+      RED_FLAG: {cls:'dispute', lb:tr.redFlagLabel},
+      CLARIFY:  {cls:'query',   lb:tr.clarifyLabel},
+      STANDARD: {cls:'ok',      lb:tr.standardLabel},
+    };
+    findings.forEach((f,i) => {
+      const st = statusMap[f.status] || statusMap.QUERY;
+      const canLetter = f.status==='DISPUTE'||f.status==='QUERY'||f.status==='RED_FLAG'||f.status==='CLARIFY';
+      const scriptHtml = f.dispute_script && f.dispute_script!=='null' ? `<div class="script-box">💬 ${f.dispute_script}</div>` : '';
+      const actionHtml = f.action && f.action!=='null' ? `<div class="script-box">→ ${f.action}</div>` : '';
+      const letterRow  = isPreCheck && canLetter ? `
+        <div class="item-letter-row" id="itemLetterRow-${i}">
+          ${lang!=='en'?`<button class="item-letter-btn" onclick="generateItemLetter(${i},'${eng()}')">✉️ ${tr.writeLetterIn} (${eng()})</button>`:''}
+          <button class="item-letter-btn" onclick="generateItemLetter(${i},'en')">✉️ ${lang!=='en'?tr.writeLetterEn:'✉️ Write letter'}</button>
+        </div>
+        <div id="itemLetterContent-${i}"></div>` : '';
+      fl.innerHTML += `
+        <div class="finding ${st.cls}">
+          <div class="finding-label">${st.lb}</div>
+          ${f.error_type?`<div class="finding-type">${f.error_type}</div>`:''}
+          <div class="finding-title">${f.charge||f.item||'—'}</div>
+          <div class="finding-body">${f.explanation||'—'}</div>
+          ${scriptHtml}${actionHtml}${letterRow}
+        </div>`;
+    });
+  }
+
+  // Questions (pre-check)
+  const qb = document.getElementById('questionsBox');
+  const ql = document.getElementById('questionsList');
+  const questions = results.questions_to_ask || [];
+  if(isPreCheck && questions.length > 0) {
+    document.getElementById('questionsTitle').textContent = tr.questionsToAsk;
+    ql.innerHTML = questions.map((q,i)=>`<div class="step-item"><span class="step-num" style="color:var(--teal)">${i+1}.</span><span style="color:var(--muted)">${q}</span></div>`).join('');
+    qb.style.display = 'block';
+  } else { qb.style.display = 'none'; }
+
+  // Next steps
+  const nb = document.getElementById('nextStepsBox');
+  const nl = document.getElementById('nextStepsList');
+  const steps = results.next_steps || [];
+  if(steps.length > 0) {
+    document.getElementById('nextStepsTitle').textContent = tr.nextSteps;
+    nl.innerHTML = steps.map((s,i)=>`<div class="step-item"><span class="step-num">${i+1}.</span><span>${s}</span></div>`).join('');
+    const oa = document.getElementById('overallAdvice');
+    if(results.overall_advice) { oa.textContent = results.overall_advice; oa.style.display='block'; }
+    nb.style.display = 'block';
+  } else { nb.style.display = 'none'; }
+
+  // Letter trigger (not for precheck — precheck has per-item letters)
+  const ltb = document.getElementById('letterTriggerBtn');
+  ltb.style.display = !isPreCheck && findings.some(f=>f.status==='DISPUTE'||f.status==='QUERY') ? 'block' : 'none';
+  ltb.textContent = tr.generateLetterTrigger;
+
+  // Reset letter box
+  document.getElementById('letterBox').classList.remove('show');
+  updateLetterLangOptions();
+  rv.scrollIntoView({behavior:'smooth'});
+}
+
+// ── Letter lang options ───────────────────────────────────────────
+function updateLetterLangOptions() {
+  const sel = document.getElementById('letterLangSel');
+  sel.innerHTML = '';
+  if(lang !== 'en') {
+    const opt1 = document.createElement('option');
+    opt1.value = eng(); opt1.textContent = eng(); sel.appendChild(opt1);
+  }
+  const optEn = document.createElement('option');
+  optEn.value = 'en'; optEn.textContent = 'English'; sel.appendChild(optEn);
+  if(lang !== 'en') {
+    const optBoth = document.createElement('option');
+    optBoth.value = 'both'; optBoth.textContent = lang==='am'?'ሁለቱንም':'Both'; sel.appendChild(optBoth);
+  }
+}
+
+function onLetterLangChange() {
+  const sel = document.getElementById('letterLangSel').value;
+  renderLetterContent(sel);
+}
+
+function toggleLetter() {
+  const box = document.getElementById('letterBox');
+  box.classList.add('show');
+  document.getElementById('letterTriggerBtn').style.display = 'none';
+  renderLetterContent(document.getElementById('letterLangSel').value);
+}
+
+function renderLetterContent(langSel) {
+  const lc = document.getElementById('letterContent');
+  const tr = t();
+  const disputed = (results?.findings||[]).filter(f=>f.status==='DISPUTE'||f.status==='QUERY'||f.status==='RED_FLAG');
+  if(disputed.length === 0) return;
+
+  const showEng = langSel==='en'||langSel==='both';
+  const showTarget = lang!=='en' && (langSel===eng()||langSel==='both');
+
+  let html = '';
+  if(showTarget) {
+    const key = eng();
+    if(letterData[key]) {
+      html += `<div class="letter-content">${letterData[key]}</div>
+               <div class="letter-actions">
+                 <button class="dl-btn" onclick="downloadLetter('${key}')">${tr.download} (${key})</button>
+               </div>`;
+    } else {
+      html += `<button class="gen-letter-btn" id="genBtn-${key}" onclick="generateLetter('${key}')">
+                 ${letterLoadingMap[key]?'⏳ Generating...':'✉️ '+tr.genLetterBtn+' ('+key+')'}
+               </button>`;
+    }
+  }
+  if(showEng) {
+    if(letterData['en']) {
+      html += `<div class="letter-content" style="margin-top:${showTarget?'16px':'0'}">${letterData['en']}</div>
+               <div class="letter-actions">
+                 <button class="dl-btn" onclick="downloadLetter('en')">${tr.download} (English)</button>
+               </div>`;
+    } else {
+      html += `<button class="gen-letter-btn" id="genBtn-en" style="margin-top:${showTarget?'8px':'0'}" onclick="generateLetter('en')">
+                 ${letterLoadingMap['en']?'⏳ Generating...':'✉️ '+tr.genLetterBtn+' (English)'}
+               </button>`;
+    }
+  }
+  if(!showEng && !showTarget && lang==='en') {
+    if(letterData['en']) {
+      html = `<div class="letter-content">${letterData['en']}</div>
+              <div class="letter-actions"><button class="dl-btn" onclick="downloadLetter('en')">${tr.download}</button></div>`;
+    } else {
+      html = `<button class="gen-letter-btn" onclick="generateLetter('en')">${letterLoadingMap['en']?'⏳ Generating...':'✉️ '+tr.genLetterBtn}</button>`;
+    }
+  }
+  lc.innerHTML = html;
+}
+
+// ── Generate full dispute letter ──────────────────────────────────
+async function generateLetter(targetLang) {
+  if(!results?.findings) return;
+  const disputed = results.findings.filter(f=>f.status==='DISPUTE'||f.status==='QUERY'||f.status==='RED_FLAG');
+  letterLoadingMap[targetLang] = true;
+  renderLetterContent(document.getElementById('letterLangSel').value);
+  try {
+    const raw = await apiCall([{text:buildLetterPrompt(targetLang,disputed)}], 1200);
+    letterData[targetLang] = raw.trim();
+  } catch(e) {
+    letterData[targetLang] = null;
+    showError('Letter generation failed: ' + e.message);
+  }
+  letterLoadingMap[targetLang] = false;
+  renderLetterContent(document.getElementById('letterLangSel').value);
+}
+
+// ── Generate per-item letter ──────────────────────────────────────
+async function generateItemLetter(idx, targetLang) {
+  const finding = results?.findings?.[idx];
+  if(!finding) return;
+  const key = `${idx}-${targetLang}`;
+  const rowEl = document.getElementById('itemLetterRow-'+idx);
+  const contentEl = document.getElementById('itemLetterContent-'+idx);
+  if(contentEl) contentEl.innerHTML = '<p style="font-size:12px;color:var(--muted);margin-top:6px">⏳ Generating...</p>';
+  try {
+    const raw = await apiCall([{text:buildLetterPrompt(targetLang,[finding])}], 1000);
+    if(contentEl) contentEl.innerHTML = `
+      <div class="item-letter-content">${raw.trim()}</div>
+      <div class="letter-actions" style="margin-top:8px">
+        <button class="dl-btn" style="font-size:12px;padding:7px 14px" onclick="downloadLetterText('${raw.trim().replace(/'/g,"\\'")}','item-letter-${idx}-${targetLang}.txt')">${t().download}</button>
+      </div>`;
+  } catch(e) {
+    if(contentEl) contentEl.innerHTML = `<p style="font-size:12px;color:var(--red);margin-top:6px">Failed. <button style="border:none;background:none;color:var(--red);cursor:pointer;font-size:12px;text-decoration:underline" onclick="generateItemLetter(${idx},'${targetLang}')">Try again</button></p>`;
+  }
+}
+
+// ── Download ──────────────────────────────────────────────────────
+function downloadLetter(langKey) {
+  const text = letterData[langKey];
+  if(!text) return;
+  downloadLetterText(text, `dispute-letter-${langKey}.txt`);
+}
+
+function downloadLetterText(text, filename) {
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename || 'letter.txt';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  const orig = document.title;
+  document.title = '✅ Downloaded!';
+  setTimeout(()=>document.title=orig, 2000);
+}
+
+// ── Reset ─────────────────────────────────────────────────────────
+function resetAll() {
+  results = null; letterData = {}; letterLoadingMap = {};
+  pkgDoc = null; invDoc = null; pcDoc = null;
+  mode = 'itemised';
+  document.getElementById('resultsView').classList.remove('show');
+  document.getElementById('loadingView').classList.remove('show');
+  document.querySelector('.main').style.display = 'block';
+  document.getElementById('letterBox').classList.remove('show');
+  document.getElementById('errorMsg').classList.remove('show');
+  // Reset dontKnow
+  document.getElementById('dontKnowCheck').checked = false;
+  toggleDontKnow();
+  // Reset upload display text
+  const tr = t();
+  const pkgTr = tr.pkgUpload||'📎 Upload your package agreement (photo, screenshot or PDF)';
+  const invTr = tr.invUpload||'📎 Upload your hospital invoice (photo, screenshot or PDF)';
+  const pcTr  = tr.pcUpload||'📎 Upload your package document (photo, screenshot or PDF)';
+  const pd = document.getElementById('pkgDocDisplay'); if(pd) pd.textContent = pkgTr;
+  const id = document.getElementById('invDocDisplay'); if(id) id.textContent = invTr;
+  const cd = document.getElementById('pcDocDisplay'); if(cd) cd.textContent = pcTr;
+  // Reset tabs to itemised
+  switchMode('itemised');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Boot ──────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
