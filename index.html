@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1499,9 +1499,9 @@ async function apiCall(messages, maxTok=3000) {
     });
     if(m.text) content.push({type:'text',text:m.text});
   });
-  const res = await fetch('/api/analyse',{
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:maxTok, system:SYS(),
+    body:JSON.stringify({model:'claude-sonnet-4-6', max_tokens:maxTok, system:SYS(),
       messages:[{role:'user', content:content.length>1?content:[{type:'text',text:content.find(c=>c.type==='text')?.text||''}]}]})
   });
   const data = await res.json();
