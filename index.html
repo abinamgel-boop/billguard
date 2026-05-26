@@ -787,7 +787,7 @@ footer strong { color: var(--teal); }
 <!-- HERO -->
 <div class="hero">
   <div class="hero-badge" id="heroBadge">Built by healthcare audit professionals</div>
-  <h1>Your hospital bill<br><em>probably has errors</em></h1>
+  <h1><span id="h1line1">Your hospital bill</span><br><em id="h1line2">probably has errors</em></h1>
   <p class="hero-sub" id="heroSub">Studies show 80% of hospital bills contain at least one mistake. The average overcharge is £400–£1,500 ($500–$2,000) per stay. BillGuard helps you find them — and dispute them.</p>
   <div class="stats-row">
     <div class="stat-item"><span class="stat-num">80%</span><span class="stat-label" id="stat2lbl">Bills have errors</span></div>
@@ -803,22 +803,22 @@ footer strong { color: var(--teal); }
   <div class="lang-notice" id="langNotice"></div>
 
   <!-- CURRENCY ROW -->
-  <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 16px;margin-bottom:16px">
-    <span style="font-size:13px;color:var(--muted);white-space:nowrap">💱 Currency:</span>
-    <select id="currencySelect" onchange="currency=this.value;updateCurrencyLabel()" style="flex:1;background:transparent;border:none;color:var(--cream);font-family:inherit;font-size:14px;cursor:pointer;outline:none">
-      <option value="GBP">£ GBP — British Pound</option>
-      <option value="USD">$ USD — US Dollar</option>
-      <option value="EUR">€ EUR — Euro</option>
-      <option value="INR">₹ INR — Indian Rupee</option>
-      <option value="THB">฿ THB — Thai Baht</option>
-      <option value="TRY">₺ TRY — Turkish Lira</option>
-      <option value="AED">AED — UAE Dirham</option>
-      <option value="MYR">RM MYR — Malaysian Ringgit</option>
-      <option value="SGD">S$ SGD — Singapore Dollar</option>
-      <option value="ZAR">R ZAR — South African Rand</option>
-      <option value="ETB">Br ETB — Ethiopian Birr</option>
+  <div style="display:flex;align-items:center;gap:12px;background:rgba(26,191,184,0.06);border:1px solid rgba(26,191,184,0.2);border-radius:12px;padding:10px 16px;margin-bottom:16px">
+    <span id="currencyLabel" style="font-size:13px;color:var(--muted);white-space:nowrap">💱 Currency:</span>
+    <select id="currencySelect" onchange="currency=this.value;updateCurrencyLabel()" style="flex:1;background:transparent;border:none;color:#F2EDE4;font-family:inherit;font-size:14px;cursor:pointer;outline:none;min-width:200px">
+      <option value="GBP" style="background:#0B1C2C;color:#F2EDE4">£ GBP — British Pound</option>
+      <option value="USD" style="background:#0B1C2C;color:#F2EDE4">$ USD — US Dollar</option>
+      <option value="EUR" style="background:#0B1C2C;color:#F2EDE4">€ EUR — Euro</option>
+      <option value="INR" style="background:#0B1C2C;color:#F2EDE4">₹ INR — Indian Rupee</option>
+      <option value="THB" style="background:#0B1C2C;color:#F2EDE4">฿ THB — Thai Baht</option>
+      <option value="TRY" style="background:#0B1C2C;color:#F2EDE4">₺ TRY — Turkish Lira</option>
+      <option value="AED" style="background:#0B1C2C;color:#F2EDE4">AED — UAE Dirham</option>
+      <option value="MYR" style="background:#0B1C2C;color:#F2EDE4">RM MYR — Malaysian Ringgit</option>
+      <option value="SGD" style="background:#0B1C2C;color:#F2EDE4">S$ SGD — Singapore Dollar</option>
+      <option value="ZAR" style="background:#0B1C2C;color:#F2EDE4">R ZAR — South African Rand</option>
+      <option value="ETB" style="background:#0B1C2C;color:#F2EDE4">Br ETB — Ethiopian Birr</option>
     </select>
-    <span id="currencyNote" style="font-size:11px;color:var(--muted);white-space:nowrap">Used in analysis</span>
+    <span id="currencyNote" style="font-size:11px;color:var(--teal);white-space:nowrap">Used in analysis</span>
   </div>
 
   <!-- TABS -->
@@ -1196,6 +1196,22 @@ const T = {
     privacyNote:"🔒 ዳታዎ ወዲያውኑ ተሰርዟል። ምንም አልተቀመጠም።",
     resetTopBtn:"← ሌላ ሂሳብ ይመርምሩ",
     heroBadge:"በጤና ምርመራ ባለሙያዎች የተሰራ",
+    h1line1:"የሆስፒታል ሂሳብዎ",
+    h1line2:"ስህተት አለው",
+    letterTitle:"📄 የሞግት ደብዳቤ",
+    letterLangLabel:"የደብዳቤ ቋንቋ:",
+    loadingSub:"15 ምድቦች እየተፈተሹ ናቸው",
+    loadingPreSub:"ሊደበቁ ወጪዎች ይፈተሻሉ",
+    preCheckBtn:"ፓኬጁን አሁን ፈትሽ",
+    tabPackage:"✈️ የወጭ ሕክምና (ሂሳብ ደርሶኛል)",
+    tabPreCheck:"🔍 ከፈረሙ በፊት",
+    liAmt:"መጠን",
+    liQty:"ብዛት",
+    liQtyPh:"ለምሳሌ: 3 ሰዓት",
+    liDate:"የአገልግሎት ቀን",
+    liRemove:"አስወግዱ",
+    chargeNum:"ክፍያ",
+    generateLetterTrigger:"✉️ የሞግት ደብዳቤ ፍጠሩ",
     stat1lbl:"የስህተት ዓይነቶች",
     stat2lbl:"ሂሳቦች ስህተት አላቸው",
     stat3lbl:"ምንም ዳታ አይቀመጥም",
@@ -1237,6 +1253,10 @@ function applyTranslations() {
   setT('stat1lbl', tr.stat1lbl||'Error types checked');
   setT('stat2lbl', tr.stat2lbl||'Bills have errors');
   setT('stat3lbl', tr.stat3lbl||'Data stored');
+  setT('h1line1', tr.h1line1||'Your hospital bill');
+  setT('h1line2', tr.h1line2||'probably has errors');
+  setT('currencyLabel', (lang==='am'?'💱 ምንዛሬ:':'💱 Currency:'));
+  setT('currencyNote', (lang==='am'?'በትንታኔ ውስጥ ይጠቅሳል':'Used in analysis'));
   setT('consentText', tr.consent);
   setT('analyseBtnLabel', mode==='precheck'?tr.preCheckBtn:tr.analyseBtn);
   setT('disclaimerText', tr.disclaimer);
