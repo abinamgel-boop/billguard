@@ -793,6 +793,24 @@ footer strong { color: var(--teal); }
     <div class="stat-item"><span class="stat-num">80%</span><span class="stat-label" id="stat2lbl">Bills have errors</span></div>
     <div class="stat-item"><span class="stat-num">15</span><span class="stat-label" id="stat1lbl">Error types checked</span></div>
     <div class="stat-item"><span class="stat-num">0</span><span class="stat-label" id="stat3lbl">Data stored</span></div>
+
+  <!-- Currency selector - in hero so always visible -->
+  <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(26,191,184,0.3);border-radius:30px;padding:8px 18px;margin-top:12px">
+    <span id="currencyLabel" style="font-size:12px;color:rgba(255,255,255,0.5)">💱 Currency:</span>
+    <select id="currencySelect" onchange="currency=this.value" style="background:transparent;border:none;color:#F2EDE4;font-family:inherit;font-size:13px;cursor:pointer;outline:none;font-weight:500">
+      <option value="GBP" style="background:#0B1C2C;color:#F2EDE4">£ British Pound (GBP)</option>
+      <option value="USD" style="background:#0B1C2C;color:#F2EDE4">$ US Dollar (USD)</option>
+      <option value="EUR" style="background:#0B1C2C;color:#F2EDE4">€ Euro (EUR)</option>
+      <option value="INR" style="background:#0B1C2C;color:#F2EDE4">₹ Indian Rupee (INR)</option>
+      <option value="THB" style="background:#0B1C2C;color:#F2EDE4">฿ Thai Baht (THB)</option>
+      <option value="TRY" style="background:#0B1C2C;color:#F2EDE4">₺ Turkish Lira (TRY)</option>
+      <option value="AED" style="background:#0B1C2C;color:#F2EDE4">AED — UAE Dirham</option>
+      <option value="MYR" style="background:#0B1C2C;color:#F2EDE4">RM Malaysian Ringgit</option>
+      <option value="SGD" style="background:#0B1C2C;color:#F2EDE4">S$ Singapore Dollar</option>
+      <option value="ZAR" style="background:#0B1C2C;color:#F2EDE4">R South African Rand</option>
+      <option value="ETB" style="background:#0B1C2C;color:#F2EDE4">Br Ethiopian Birr (ETB)</option>
+    </select>
+  </div>
   </div>
 </div>
 
@@ -1880,6 +1898,8 @@ function resetAll() {
 
 // ── Boot ──────────────────────────────────────────────────────────
 init();
+// Apply translations on load (in case lang was pre-set or for consistency)
+applyTranslations();
 </script>
 </body>
 </html>
