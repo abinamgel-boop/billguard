@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -780,6 +780,10 @@ footer strong { color: var(--teal); }
         <option value="so">Soomaali (Somali)</option>
         <option value="sw">Kiswahili (Swahili)</option>
       </select>
+        <div class="lang-pill" style="margin-left:8px">
+      💱
+      <select id="currencySelect" onchange="currency=this.value" style="background:none;border:none;color:var(--cream);font-family:inherit;font-size:13px;cursor:pointer;outline:none;padding-right:4px">
+      </select>
     </div>
   </div>
 </nav>
@@ -987,9 +991,38 @@ footer strong { color: var(--teal); }
   <p style="margin-top:6px">Your data is never stored · This tool does not provide legal advice</p>
 </footer>
 
+
+<script>
+const CURRENCIES_DATA = [
+  { code:"GBP", symbol:"£", label:"£ GBP — British Pound" },
+  { code:"USD", symbol:"$", label:"$ USD — US Dollar" },
+  { code:"EUR", symbol:"€", label:"€ EUR — Euro" },
+  { code:"INR", symbol:"₹", label:"₹ INR — Indian Rupee" },
+  { code:"THB", symbol:"฿", label:"฿ THB — Thai Baht" },
+  { code:"TRY", symbol:"₺", label:"₺ TRY — Turkish Lira" },
+  { code:"AED", symbol:"AED", label:"AED — UAE Dirham" },
+  { code:"MYR", symbol:"RM",  label:"RM MYR — Malaysian Ringgit" },
+  { code:"SGD", symbol:"S$", label:"S$ SGD — Singapore Dollar" },
+  { code:"ZAR", symbol:"R",  label:"R ZAR — South African Rand" },
+  { code:"ETB", symbol:"Br", label:"Br ETB — Ethiopian Birr" },
+];
+</script>
 <script>
 // ── State ──────────────────────────────────────────────────────────
-let mode = 'itemised', lang = 'en', results = null;
+const CURRENCIES = [
+  { code:'GBP', symbol:'£', label:'£ GBP — British Pound' },
+  { code:'USD', symbol:'$', label:'$ USD — US Dollar' },
+  { code:'EUR', symbol:'€', label:'€ EUR — Euro' },
+  { code:'INR', symbol:'₹', label:'₹ INR — Indian Rupee' },
+  { code:'THB', symbol:'฿', label:'฿ THB — Thai Baht' },
+  { code:'TRY', symbol:'₺', label:'₺ TRY — Turkish Lira' },
+  { code:'AED', symbol:'AED', label:'AED — UAE Dirham' },
+  { code:'MYR', symbol:'RM',  label:'RM MYR — Malaysian Ringgit' },
+  { code:'SGD', symbol:'S$', label:'S$ SGD — Singapore Dollar' },
+  { code:'ZAR', symbol:'R',  label:'R ZAR — South African Rand' },
+  { code:'ETB', symbol:'Br', label:'Br ETB — Ethiopian Birr' },
+];
+let mode = 'itemised', lang = 'en', results = null, currency = 'GBP';
 let pkgDoc = null, invDoc = null, pcDoc = null;
 let letterData = {}, letterLoadingMap = {};
 let lineCount = 0, nextLineId = 1;
@@ -1164,6 +1197,8 @@ function init() {
 }
 
 // ── Language ──────────────────────────────────────────────────────
+function currSym() { return (CURRENCIES.find(c=>c.code===currency)||{symbol:'£'}).symbol; }
+
 function onLangChange() {
   lang = document.getElementById('langSelect').value;
   applyTranslations();
@@ -1440,13 +1475,15 @@ const SYS = () => lang==='en'
   : `You are an NHS clinical audit professional. CRITICAL: ALL JSON text values MUST be in ${eng()}. Every explanation, dispute_script, step, question MUST be in ${eng()}. JSON keys stay in English. Respond ONLY with valid JSON.`;
 
 function buildItemisedPrompt() {
+  const sym = currSym();
+  const currNote = `Patient currency: ${currency} (${sym}). Use ${sym} for all amounts in your response.`;
   const lines = [...document.querySelectorAll('.line-item')]
     .filter(el=>el.querySelector('.li-desc')?.value.trim())
     .map((el,i)=>`Charge ${i+1}: ${el.querySelector('.li-desc').value} | Amt:${el.querySelector('.li-amt').value||'?'} | Qty:${el.querySelector('.li-qty').value||'?'} | Date:${el.querySelector('.li-date').value||'?'} | Note:${el.querySelector('.li-note').value||'none'}`)
     .join('; ');
   const admit = document.getElementById('i-admit').value;
   const disch = document.getElementById('i-discharge').value;
-  return `${LL()}Analyse for billing errors using these 15 categories: duplicate charges, upcoding, unbundling, service not received, wrong quantity, wrong patient info, date error, wrong admission type, undisclosed facility fee, pharmacy overcharge, theatre time overcharge, wrong consultant, expired code, insurance not applied, readmission error.
+  return `${LL()}${currNote}\nAnalyse for billing errors using these 15 categories: duplicate charges, upcoding, unbundling, service not received, wrong quantity, wrong patient info, date error, wrong admission type, undisclosed facility fee, pharmacy overcharge, theatre time overcharge, wrong consultant, expired code, insurance not applied, readmission error.
 BILL: Country:${document.getElementById('i-country').value||'?'} | Type:${document.getElementById('i-type').value||'?'} | Admitted:${admit||'?'} | Discharged:${disch||'?'} | Total:${document.getElementById('i-total').value||'?'} | Procedure:${document.getElementById('i-procedure').value||'?'} | Concerns:${document.getElementById('i-concerns').value||'none'}
 CHARGES: ${lines}
 Respond ONLY this JSON no markdown:
@@ -1454,8 +1491,10 @@ Respond ONLY this JSON no markdown:
 }
 
 function buildPackagePrompt() {
+  const sym = currSym();
+  const currNote = `Patient currency: ${currency} (${sym}). Use ${sym} for all amounts.`;
   const dontKnow = document.getElementById('dontKnowCheck').checked;
-  return `${LL()}Identify which extra charges are disputable vs legitimate. If extras unknown, flag common hidden charges for this treatment type.
+  return `${LL()}${currNote}\nIdentify which extra charges are disputable vs legitimate. If extras unknown, flag common hidden charges for this treatment type.
 Package: ${document.getElementById('p-country').value||'?'} | Treatment:${document.getElementById('p-treatment').value||'?'} | Agreed:${document.getElementById('p-original').value||'?'} | Final:${document.getElementById('p-final').value||'?'}
 Included: ${document.getElementById('p-package').value||'not specified'}
 Extra charges: ${dontKnow?'Unknown — flag typical hidden charges for this package type':document.getElementById('p-extras').value}
@@ -1465,7 +1504,9 @@ Respond ONLY this JSON no markdown:
 }
 
 function buildPreCheckPrompt() {
-  return `${LL()}Review this medical package offer BEFORE the patient signs. Flag: RED_FLAG (serious concern/hidden cost/missing info), CLARIFY (needs clarification before signing), STANDARD (acceptable).
+  const sym = currSym();
+  const currNote = `Patient currency: ${currency} (${sym}). Use ${sym} for all amounts.`;
+  return `${LL()}${currNote}\nReview this medical package offer BEFORE the patient signs. Flag: RED_FLAG (serious concern/hidden cost/missing info), CLARIFY (needs clarification before signing), STANDARD (acceptable).
 Treatment: ${document.getElementById('pc-treatment').value||'?'} | Country: ${document.getElementById('pc-country').value||'?'} | Budget: ${document.getElementById('pc-budget').value||'not specified'}
 Package offer: ${document.getElementById('pc-text').value||'[see uploaded document]'}
 Respond ONLY this JSON no markdown:
@@ -1499,7 +1540,7 @@ async function apiCall(messages, maxTok=3000) {
     });
     if(m.text) content.push({type:'text',text:m.text});
   });
-  const res = await fetch('https://api.anthropic.com/v1/messages',{
+  const res = await fetch('/api/analyse',{
     method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model:'claude-sonnet-4-6', max_tokens:maxTok, system:SYS(),
       messages:[{role:'user', content:content.length>1?content:[{type:'text',text:content.find(c=>c.type==='text')?.text||''}]}]})
@@ -1756,10 +1797,11 @@ function downloadLetter(langKey) {
 }
 
 function downloadLetterText(text, filename) {
-  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const wordHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body{font-family:Calibri,Arial,sans-serif;font-size:12pt;line-height:1.6;margin:2cm}</style></head><body><pre style="font-family:Calibri;font-size:12pt;white-space:pre-wrap">' + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre></body></html>';
+  const blob = new Blob([wordHtml], {type:'application/msword'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url; a.download = filename || 'letter.txt';
+  a.href = url; a.download = (filename||'letter').replace(/\.txt$/,'.doc');
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
   const orig = document.title;
@@ -1781,9 +1823,12 @@ function resetAll() {
   document.getElementById('dontKnowCheck').checked = false;
   toggleDontKnow();
   // Reset upload display text
-  const tr = t();
-  const pkgTr = tr.pkgUpload||'📎 Upload your package agreement (photo, screenshot or PDF)';
-  const invTr = tr.invUpload||'📎 Upload your hospital invoice (photo, screenshot or PDF)';
+  const pkgD = document.getElementById('pkgDocDisplay');
+  const invD = document.getElementById('invDocDisplay');
+  const pcD2 = document.getElementById('pcDocDisplay');
+  if(pkgD) pkgD.textContent = '📎 Upload your package agreement (photo, screenshot or PDF)';
+  if(invD) invD.textContent = '📎 Upload your hospital invoice (photo, screenshot or PDF)';
+  if(pcD2) pcD2.textContent = '📎 Upload your package document (photo, screenshot or PDF)';
   const pcTr  = tr.pcUpload||'📎 Upload your package document (photo, screenshot or PDF)';
   const pd = document.getElementById('pkgDocDisplay'); if(pd) pd.textContent = pkgTr;
   const id = document.getElementById('invDocDisplay'); if(id) id.textContent = invTr;
